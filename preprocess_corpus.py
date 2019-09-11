@@ -101,7 +101,8 @@ def test_preprocessing(raw_text, sentence_id=0):
     :return: un tuple (sentences, tokens, lemmas, stems) qui contient le résultat des quatre fonctions appliquées à
     tout le corpus
     """
-    pass
+
+
 
 
 if __name__ == "__main__":
@@ -113,4 +114,30 @@ if __name__ == "__main__":
     python preprocess_corpus.py
     ```
     """
+
+    raw_text_test = open("data/shakespeare_test.txt", "r").read()
+    raw_text_train = open("data/shakespeare_train.txt", "r").read()
+    with open("output/shakespeare_test_phrases.txt", "w") as f:
+        for sentence in segmentize(raw_text_test):
+            f.write(sentence + " \n")
+    with open("output/shakespeare_train_phrases.txt", "w") as f:
+        for sentence in segmentize(raw_text_train):
+            f.write(sentence + " \n")
+    with open("output/shakespeare_test_mots.txt", "w") as f:
+        for sentence in segmentize(raw_text_test):
+            for word in sentence:
+                f.write(word + " ")
+            f.write("\n")
+    with open("output/shakespeare_train_mots.txt", "w") as f:
+        for sentence in segmentize(raw_text_train):
+            for word in sentence:
+                f.write(word + " ")
+            f.write("\n")
+
+#    open("output/shakespeare_train_phrases.txt").write(segmentize(raw_text_train))
+ #   open("output/shakespeare_test_mots.txt").write(tokenize(segmentize(raw_text_test)))
+  #  open("output/shakespeare_train_mots.txt").write(tokenize(segmentize(raw_text_train)))
+
+
+
     print(segmentize("Alice est là. Bob est ici"))
