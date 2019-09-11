@@ -124,12 +124,12 @@ if __name__ == "__main__":
         for sentence in segmentize(raw_text_train):
             f.write(sentence + " \n")
     with open("output/shakespeare_test_mots.txt", "w") as f:
-        for sentence in segmentize(raw_text_test):
+        for sentence in tokenize(segmentize(raw_text_test)):
             for word in sentence:
                 f.write(word + " ")
             f.write("\n")
     with open("output/shakespeare_train_mots.txt", "w") as f:
-        for sentence in segmentize(raw_text_train):
+        for sentence in tokenize(segmentize(raw_text_train)):
             for word in sentence:
                 f.write(word + " ")
             f.write("\n")
