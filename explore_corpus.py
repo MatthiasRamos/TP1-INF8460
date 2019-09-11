@@ -9,20 +9,24 @@ Dans toutes les fonctions de ce fichier, le paramètre `corpus` désigne une lis
 ]
 """
 import preprocess_corpus as pre
-
+from collections import Counter
 
 def count_tokens(corpus):
     """
     Renvoie le nombre de mots dans le corpus
     """
-    pass
+    numberOfTokens = 0
+    for sentence in corpus:
+        numberOfTokens += len(sentence)
+    return numberOfTokens
 
 
 def count_types(corpus):
     """
     Renvoie le nombre de types (mots distincts) dans le corpus
     """
-    pass
+    lemmatized_corpus = pre.lemmatize(stem(corpus))
+    return count_tokens(lemmatized_corpus)
 
 
 def get_most_frequent(corpus, n):
@@ -31,14 +35,16 @@ def get_most_frequent(corpus, n):
 
     :return: list(tuple(str, float)), une liste de paires (mot, fréquence)
     """
-    pass
+    Counter = Counter(corpus) # corpus ou juste les types dans le corpus ?
+    most_occur = Counter.most_common(n)
+    return most_occur
 
 
 def get_token_type_ratio(corpus):
     """
     Renvoie le ratio nombre de tokens sur nombre de types
     """
-    pass
+    return count_tokens(corpus)/count_types(corpus)
 
 
 def count_lemmas(corpus):
@@ -74,7 +80,7 @@ def explore(corpus):
 
 if __name__ == "__main__":
     """
-    Ici, appelez la fonction `explore` sur `shakespeare_train` et `shakespeare_test`. Quand on exécute le fichier, on 
+    Ici, appelez la fonction `explore` sur `shakespeare_train` et `shakespeare_test`. Quand on exécute le fichier, on
     doit obtenir :
 
     >> python explore_corpus
