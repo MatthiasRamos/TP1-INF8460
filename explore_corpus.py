@@ -25,8 +25,11 @@ def count_types(corpus):
     """
     Renvoie le nombre de types (mots distincts) dans le corpus
     """
-    lemmatized_corpus = pre.lemmatize(stem(corpus))
-    return count_tokens(lemmatized_corpus)
+    words = {}
+    for sent in corpus:
+        for word in sent:
+            words[word] = True
+    return len(words)
 
 
 def get_most_frequent(corpus, n):
@@ -35,9 +38,11 @@ def get_most_frequent(corpus, n):
 
     :return: list(tuple(str, float)), une liste de paires (mot, fréquence)
     """
-    Counter = Counter(corpus) # corpus ou juste les types dans le corpus ?
-    most_occur = Counter.most_common(n)
-    return most_occur
+    words = {}
+    for sent in corpus:
+        for word in sent:
+            words[word] = words.get(word,0) + 1
+    return sorted(words.items(),key=lambda x: -x[1])[:n]
 
 
 def get_token_type_ratio(corpus):
@@ -51,14 +56,15 @@ def count_lemmas(corpus):
     """
     Renvoie le nombre de lemmes distincts
     """
-    pass
-
+    lemmatized_corpus = pre.lemmatize(corpus) # TODO: Do we stem before lemmatize ?
+    return count_types(lemmatized_corpus)
 
 def count_stems(corpus):
     """
     Renvoie le nombre de racines (stems) distinctes
     """
-    pass
+    stem_corpus = pre.stem(corpus)
+    return count_types(stem_corpus)
 
 
 def explore(corpus):
@@ -75,8 +81,12 @@ def explore(corpus):
 
     (Les chiffres ci-dessus sont indicatifs et ne correspondent pas aux résultats attendus)
     """
-    pass
-
+    print(f"Le nombre total de tokens: {count_tokens(corpus)}")
+    print(f"Le nombre total de mots distincts: {count_types(corpus)}")
+    print(f"Les 15 mots les plus fréquents du vocabulaire ainsi que leur fréquence: {get_most_frequent(corpus,15)}")
+    print(f"Le ratio token/type: {get_token_type_ratio(corpus)}")
+    print(f"Le nombre total de lemmes distincts: {count_lemmas(corpus)}")
+    print(f"Le nombre total de racines distinctes: {count_stems(corpus)}")
 
 if __name__ == "__main__":
     """
@@ -94,4 +104,10 @@ if __name__ == "__main__":
     Nombre de types: 709
     ...
     """
-    pass
+    print("-- shakespeare_train --")
+    corpus = pre.read_and_preprocess("data/shakespeare_train.txt")
+    explore(corpus)
+
+    print("-- shakespeare_test --")
+    corpus = pre.read_and_preprocess("data/shakespeare_test.txt")
+    explore(corpus)

@@ -51,11 +51,8 @@ def lemmatize(corpus):
     :param corpus: list(list(str)), une liste de phrases tokenizées
     :return: list(list(str)), une liste de phrases lemmatisées
     """
-    lemmzer = nltk.WordNetLemmatizer()
-    lems = []
-    for sent in corpus:
-        lems.append([lemmzer.lemmatize(token) for token in sent])
-    return lems
+    lm = nltk.WordNetLemmatizer()
+    return [list(map(lm.lemmatize,st)) for st in corpus]
 
 def stem(corpus):
     """
@@ -65,10 +62,7 @@ def stem(corpus):
     :return: list(list(str)), une liste de phrases stemées
     """
     stemmer = nltk.PorterStemmer()
-    stems = []
-    for sent in corpus:
-        stems.append([stemmer.stem(token) for token in sent])
-    return stems
+    return [list(map(stemmer.stem,st)) for st in corpus]
 
 def read_and_preprocess(filename):
     """
@@ -101,8 +95,19 @@ def test_preprocessing(raw_text, sentence_id=0):
     :return: un tuple (sentences, tokens, lemmas, stems) qui contient le résultat des quatre fonctions appliquées à
     tout le corpus
     """
+    sg_text = segmentize(raw_text)
+    print(sg_text[sentence_id])
 
+    tk_text = tokenize(sg_text)
+    print(tk_text[sentence_id])
 
+    lm_text = lemmatize(tk_text)
+    print(lm_text[sentence_id])
+
+    stem_text = stem(tk_text)
+    print(stem_text[sentence_id])
+
+    return sg_text, tk_text, lm_text, stem_text
 
 
 if __name__ == "__main__":
@@ -114,30 +119,53 @@ if __name__ == "__main__":
     python preprocess_corpus.py
     ```
     """
+    import os
+    import re
+    data_folder = "data"
+    output_folder = "output"
+    os.makedirs(output_folder,exist_ok=True)
 
-    raw_text_test = open("data/shakespeare_test.txt", "r").read()
-    raw_text_train = open("data/shakespeare_train.txt", "r").read()
-    with open("output/shakespeare_test_phrases.txt", "w") as f:
-        for sentence in segmentize(raw_text_test):
-            f.write(sentence + " \n")
-    with open("output/shakespeare_train_phrases.txt", "w") as f:
-        for sentence in segmentize(raw_text_train):
-            f.write(sentence + " \n")
-    with open("output/shakespeare_test_mots.txt", "w") as f:
-        for sentence in tokenize(segmentize(raw_text_test)):
-            for word in sentence:
-                f.write(word + " ")
-            f.write("\n")
-    with open("output/shakespeare_train_mots.txt", "w") as f:
-        for sentence in tokenize(segmentize(raw_text_train)):
-            for word in sentence:
-                f.write(word + " ")
-            f.write("\n")
+    with open(os.path.join(data_folder,"shakespeare_test.txt"), "r") as f:
+        raw_text = f.read().split("\n\n",1)[1]
+        raw_text = " ".join(re.split("\n\n\w+\n\n",raw_text)).replace("\n"," ")
 
-#    open("output/shakespeare_train_phrases.txt").write(segmentize(raw_text_train))
- #   open("output/shakespeare_test_mots.txt").write(tokenize(segmentize(raw_text_test)))
-  #  open("output/shakespeare_train_mots.txt").write(tokenize(segmentize(raw_text_train)))
+        sg_text, tk_text, lm_text, stem_text = test_preprocessing(raw_text)
 
+        # save sentences
+        with open(os.path.join(output_folder,"shakespeare_test_phrases.txt"),"w") as fout:
+            fout.write("\n".join(sg_text))
 
+        # save words
+        with open(os.path.join(output_folder,"shakespeare_test_mots.txt"),"w") as fout:
+            fout.write("\n".join(map(lambda list_words: " ".join(list_words),tk_text)))
 
-    print(segmentize("Alice est là. Bob est ici"))
+        # save lemmes
+        with open(os.path.join(output_folder,"shakespeare_test_lemmes.txt"),"w") as fout:
+            fout.write("\n".join(map(lambda list_words: " ".join(list_words),lm_text)))
+        
+        # save stems
+        with open(os.path.join(output_folder,"shakespeare_test_stems.txt"),"w") as fout:
+            fout.write("\n".join(map(lambda list_words: " ".join(list_words),stem_text)))
+
+    with open(os.path.join(data_folder,"shakespeare_train.txt"), "r") as f:
+        raw_text = f.read().split("\n",1)[1]
+        raw_text = " ".join(re.split("\n\n.*:",raw_text)).replace("\n"," ")
+
+        sg_text, tk_text, lm_text, stem_text = test_preprocessing(raw_text)
+
+        # save sentences
+        with open(os.path.join(output_folder,"shakespeare_train_phrases.txt"),"w") as fout:
+            fout.write("\n".join(sg_text))
+
+        # save words
+        with open(os.path.join(output_folder,"shakespeare_train_mots.txt"),"w") as fout:
+            fout.write("\n".join(map(lambda list_words: " ".join(list_words),tk_text)))
+
+        # save lemmes
+        with open(os.path.join(output_folder,"shakespeare_train_lemmes.txt"),"w") as fout:
+            fout.write("\n".join(map(lambda list_words: " ".join(list_words),lm_text)))
+        
+        # save stems
+        with open(os.path.join(output_folder,"shakespeare_train_stems.txt"),"w") as fout:
+            fout.write("\n".join(map(lambda list_words: " ".join(list_words),stem_text)))
+    
