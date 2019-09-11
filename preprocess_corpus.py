@@ -1,6 +1,12 @@
 """
 Questions 1.1.1 à 1.1.5 : prétraitement des données.
 """
+import nltk
+import matplotlib
+import numpy
+
+nltk.download("punkt")
+nltk.download("wordnet")
 
 
 def segmentize(raw_text):
@@ -14,7 +20,7 @@ def segmentize(raw_text):
     :param raw_text: str
     :return: list(str)
     """
-    return raw_text.split(".")
+    return nltk.sent_tokenize(raw_text)
 
 
 
@@ -33,7 +39,9 @@ def tokenize(sentences):
     :param sentences: list(str), une liste de phrases
     :return: list(list(str)), une liste de phrases tokenizées
     """
-    for(mot)
+    return [nltk.word_tokenize(phrase) for phrase in sentences]
+
+
 
 
 def lemmatize(corpus):
@@ -43,8 +51,11 @@ def lemmatize(corpus):
     :param corpus: list(list(str)), une liste de phrases tokenizées
     :return: list(list(str)), une liste de phrases lemmatisées
     """
-    pass
-
+    lemmzer = nltk.WordNetLemmatizer()
+    lems = []
+    for sent in corpus:
+        lems.append([lemmzer.lemmatize(token) for token in sent])
+    return lems
 
 def stem(corpus):
     """
@@ -53,8 +64,11 @@ def stem(corpus):
     :param corpus: list(list(str)), une liste de phrases tokenizées
     :return: list(list(str)), une liste de phrases stemées
     """
-    pass
-
+    stemmer = nltk.PorterStemmer()
+    stems = []
+    for sent in corpus:
+        stems.append([stemmer.stem(token) for token in sent])
+    return stems
 
 def read_and_preprocess(filename):
     """
