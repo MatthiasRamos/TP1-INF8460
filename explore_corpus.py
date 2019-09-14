@@ -105,9 +105,9 @@ if __name__ == "__main__":
     ...
     """
     print("-- shakespeare_train --")
-    corpus = pre.read_and_preprocess("data/shakespeare_train.txt")
+    corpus = pre.read_and_preprocess("output/shakespeare_train_phrases.txt")
     explore(corpus)
 
     print("-- shakespeare_test --")
-    corpus = pre.read_and_preprocess("data/shakespeare_test.txt")
+    corpus = pre.read_and_preprocess("output/shakespeare_test_phrases.txt")
     explore(corpus)

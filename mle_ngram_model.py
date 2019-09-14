@@ -9,7 +9,9 @@ vous pourrez alors entraîner un modèle n-gramme sur un corpus avec la commande
 Sauf mention contraire, le paramètre `corpus` désigne une liste de phrases tokenizées
 """
 from itertools import chain
-
+from collections import defaultdict
+from random import choices
+from preprocess_corpus import read_and_preprocess
 
 def extract_ngrams_from_sentence(sentence, n):
     """
@@ -24,7 +26,12 @@ def extract_ngrams_from_sentence(sentence, n):
     :param n: int, l'ordre des n-grammes
     :return: list(tuple(str)), la liste des n-grammes présents dans `sentence`
     """
-    pass
+    ngrams = []
+    new_sentence = ["<s>"]*(n-1)+sentence+["</s>"]
+    for i in range(len(sentence)):
+        ngrams.append(tuple(new_sentence[i:i+n]))
+    
+    return ngrams
 
 
 def extract_ngrams(corpus, n):
@@ -41,8 +48,11 @@ def extract_ngrams(corpus, n):
     :param n: int, l'ordre des n-grammes
     :return: list(list(tuple(str))), la liste contenant les listes de n-grammes de chaque phrase
     """
-    pass
+    sentences_ngrams = []
+    for sentence in corpus:
+        sentences_ngrams.append(extract_ngrams_from_sentence(sentence, n))
 
+    return sentences_ngrams
 
 def count_ngrams(corpus, n):
     """
@@ -61,7 +71,12 @@ def count_ngrams(corpus, n):
     :param n: int, l'ordre de n-grammes
     :return: mapping(tuple(str)->mapping(str->int)), l'objet contenant les comptes de chaque n-gramme
     """
-    pass
+    counts = defaultdict(lambda :defaultdict(int))
+    ngrams = extract_ngrams(corpus, n)
+    for ngram_list in ngrams:
+        for ngram in ngram_list:
+            counts[ngram[:len(ngram) - 1]][ngram[-1]]+=1
+    return counts
 
 def compute_MLE(counts):
     """
@@ -76,8 +91,15 @@ def compute_MLE(counts):
     :param counts: mapping(tuple(str)->mapping(str->int))
     :return: mapping(tuple(str)->mapping(str->float))
     """
-    pass
+    mle_counts = defaultdict(lambda :defaultdict(int))
+    for context, next_words in counts.items():
+        count_context = sum(next_words.values())
+        next_words_probas = next_words.copy()
+        for key, value in next_words.items():
+            next_words_probas[key] = value / count_context
+        mle_counts[context] = next_words_probas
 
+    return mle_counts
 
 class NgramModel(object):
     def __init__(self, corpus, n):
@@ -111,7 +133,8 @@ class NgramModel(object):
         :param context: tuple(str), un (n-1)-gramme de contexte
         :return: str
         """
-        pass
+        possible_words, probabilities = zip(*self.counts[context].items())
+        return choices(possible_words,weights=probabilities)[0]
 
 
 if __name__ == "__main__":
@@ -142,3 +165,12 @@ if __name__ == "__main__":
         2: [("King",), ("I",), ("<s>",)],
         3: [("<s>", "<s>"), ("<s>", "I"), ("Something", "is"), ("To", "be"), ("O", "Romeo")]
     }
+
+    # Load corpus
+    corpus = read_and_preprocess("output/shakespeare_train_lemmes.txt")
+    for n,n_contexts in contexts.items():
+        print(f"n={n}")
+        print("-"*20)
+        model = NgramModel(corpus,n)
+        for context in n_contexts:
+            print(f"{context} --> {model.predict_next(context)}")
