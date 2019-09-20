@@ -16,7 +16,8 @@ la méthode attends une liste de liste de n-grammes (`list(list(tuple(str)))` et
 from nltk.lm.models import MLE
 from nltk.lm.vocabulary import Vocabulary
 from nltk.lm.preprocessing import padded_everygram_pipeline
-
+from preprocess_corpus import read_and_preprocess
+from mle_ngram_model import NgramModel
 
 def train_MLE_model(corpus, n):
     """
@@ -26,7 +27,13 @@ def train_MLE_model(corpus, n):
     :param n: l'ordre du modèle
     :return: un modèle entraîné
     """
-    pass
+    ngrams, words = padded_everygram_pipeline(n, corpus)
+    vocab = Vocabulary(words, unk_cutoff=1)
+
+    model = MLE(n,vocabulary=vocab)
+    model.fit(ngrams)
+
+    return model
 
 
 def compare_models(your_model, nltk_model, corpus, n):
@@ -42,7 +49,18 @@ def compare_models(your_model, nltk_model, corpus, n):
     :param corpus: list(list(str)), une liste de phrases tokenizées à tester
     :return: float, la proportion de n-grammes incorrects
     """
-    pass
+    ngrams_count = len(your_model.counts)
+    faulty_ngrams_counts = 0
+    for context,next_words in your_model.counts.items():
+        for word,proba in next_words.items():
+            nltk_proba = nltk_model.score(word,context)
+            if nltk_proba != proba:
+                faulty_ngrams_counts+=1
+                print(f"\tdifferent probability found! context:{context} token:{word}, nltk_proba:{nltk_proba}, my_proba:{proba}")
+            else:
+                print(nltk_proba,proba)
+    print(f"\tpercentage of incorrect ngrams: {faulty_ngrams_counts * 1. /ngrams_count}")
+    return faulty_ngrams_counts * 1. /ngrams_count
 
 
 if __name__ == "__main__":
@@ -52,4 +70,10 @@ if __name__ == "__main__":
     `compare_models `pour vérifier qu'ils donnent les mêmes résultats. 
     Comme corpus de test, vous choisirez aléatoirement 50 phrases dans `shakespeare_train`.
     """
-    pass
+    corpus = read_and_preprocess("output/shakespeare_train_lemmes.txt")
+
+    for n in [1,2,3]:
+        print(f"[+] fitting models with n={n}")
+        nltk_model = train_MLE_model(corpus,n)
+        my_model = NgramModel(corpus,n)
+        compare_models(my_model, nltk_model, corpus, n)

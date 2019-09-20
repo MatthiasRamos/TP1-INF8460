@@ -12,6 +12,7 @@ from itertools import chain
 from collections import defaultdict
 from random import choices
 from preprocess_corpus import read_and_preprocess
+import nltk
 
 def extract_ngrams_from_sentence(sentence, n):
     """
@@ -26,12 +27,7 @@ def extract_ngrams_from_sentence(sentence, n):
     :param n: int, l'ordre des n-grammes
     :return: list(tuple(str)), la liste des n-grammes présents dans `sentence`
     """
-    ngrams = []
-    new_sentence = ["<s>"]*(n-1)+sentence+["</s>"]
-    for i in range(len(sentence)):
-        ngrams.append(tuple(new_sentence[i:i+n]))
-    
-    return ngrams
+    return list(nltk.ngrams(nltk.lm.preprocessing.pad_both_ends(sentence,n),n))
 
 
 def extract_ngrams(corpus, n):

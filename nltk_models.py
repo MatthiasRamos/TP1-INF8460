@@ -18,7 +18,11 @@ On peut ensuite entraîner le modèle avec la méthode `model.fit(ngrams)`
 from nltk.lm.models import MLE, Laplace, Lidstone
 from nltk.lm.vocabulary import Vocabulary
 from nltk.lm.preprocessing import padded_everygram_pipeline
-
+from preprocess_corpus import read_and_preprocess
+import numpy as np
+import os
+from collections import defaultdict
+import matplotlib.pyplot as plt
 
 def train_LM_model(corpus, model, n, gamma=None, unk_cutoff=2):
     """
@@ -32,8 +36,22 @@ def train_LM_model(corpus, model, n, gamma=None, unk_cutoff=2):
     :param unk_cutoff: le seuil au-dessous duquel un mot est considéré comme inconnu et remplacé par <UNK>
     :return: un modèle entraîné
     """
-    pass
+    if model not in [MLE, Laplace, Lidstone]:
+        raise TypeError("Unkown model type! supported types: (MLE, Lidstone, Laplace)")
 
+    ngrams, words = padded_everygram_pipeline(n, corpus)
+    vocab = Vocabulary(words, unk_cutoff=unk_cutoff)
+
+    params = {
+        "order":n,
+        "vocabulary":vocab,
+    }
+    if model == Lidstone:
+        params["gamma"] = gamma
+    ist_model = model(**params)
+    ist_model.fit(ngrams)
+    
+    return ist_model
 
 def evaluate(model, corpus):
     """
@@ -43,7 +61,7 @@ def evaluate(model, corpus):
     :param corpus: list(list(str)), une corpus tokenizé
     :return: float
     """
-    pass
+    return model.perplexity(corpus)
 
 
 def evaluate_gamma(gamma, train, test, n):
@@ -84,8 +102,10 @@ def generate(model, n_words, text_seed=None, random_seed=None):
     """
     pass
 
-
 if __name__ == "__main__":
+    print("Loading data...")
+    corpus = read_and_preprocess("output/shakespeare_train_lemmes.txt")
+    test = read_and_preprocess("output/shakespeare_test_lemmes.txt")
     """
     Vous aurez ici trois tâches à accomplir ici :
     
@@ -93,7 +113,37 @@ if __name__ == "__main__":
     Dans un premier temps, vous devez entraîner des modèles de langue MLE et Laplace pour n=1, 2, 3 à l'aide de la 
     fonction `train_MLE_model` sur le corpus `shakespeare_train` (question 1.4.2). Puis vous devrez évaluer vos modèles 
     en mesurant leur perplexité sur le corpus `shakespeare_test` (question 1.5.2).
-    
+    """
+    print("-"*40)
+    print("Q1")
+    print("-"*40)
+    for n in [1,2,3]:
+        print(f"n={n}")
+        print("-"*20)
+        print(f"[+] fitting models with n={n}")
+        trained_mle = train_LM_model(corpus, MLE, n)
+        trained_laplace = train_LM_model(corpus, Laplace, n)
+
+        print(f"perplexity mle= {evaluate(trained_mle,test)}")
+        print(f"perplexity laplace= {evaluate(trained_laplace,test)}")
+    """
+    >output:
+    n=1
+    --------------------
+    [+] fitting models with n=1
+    perplexity mle= inf
+    perplexity laplace= 14716.000000000042
+    n=2
+    --------------------
+    [+] fitting models with n=2
+    perplexity mle= inf
+    perplexity laplace= 11782.372307261669
+    n=3
+    --------------------
+    [+] fitting models with n=3
+    perplexity mle= inf
+    perplexity laplace= 11377.463113703267
+
     2)
     Ensuite, on vous demande de tracer un graphe représentant le perplexité d'un modèle Lidstone en fonction du paramètre 
     gamma. Vous pourrez appeler la fonction `evaluate_gamma` (déjà écrite) sur `shakespeare_train` et `shakespeare_test` 
@@ -102,9 +152,42 @@ if __name__ == "__main__":
     
     Note : pour les valeurs de gamma à tester, vous pouvez utiliser la fonction `numpy.logspace(-5, 0, 10)` qui renvoie 
     une liste de 10 nombres, répartis logarithmiquement entre 10^-5 et 1.
-    
+    """
+    print("-"*40)
+    print("Q2")
+    print("-"*40)
+    os.makedirs("output",exist_ok=True)
+    results = defaultdict(list)
+    print("Training models")
+    print("-"*20)
+    for n in range(1,4):
+        plt.figure()
+        print(f"  models with n={n}",end="")
+        for gamma in np.logspace(-5, 0, 10):
+            results[n].append(evaluate_gamma(gamma,corpus,test,n))
+            print(".",end="")
+        print("")
+        with open(os.path.join("output",f"Lipston_{n}.csv"),"w") as fout:
+            fout.write("\n".join(list(map(lambda x:f"{x[0]},{x[1]}",zip(np.logspace(-5, 0, 10), results[n])))))
+        plt.plot(np.logspace(-5, 0, 10), results[n])
+        plt.xlabel("gamma")
+        plt.ylabel("perplexity value")
+        plt.title(f"Evolution of perplexity with respect to different values of gamma for n = {n}")
+        plt.savefig(os.path.join("output",f"Lipston_{n}.png"))
+    """
     3)
     Enfin, pour chaque n=1, 2, 3, vous devrez générer 2 segments de 20 mots pour des modèles MLE entraînés sur Trump.
     Réglez `unk_cutoff=1` pour éviter que le modèle ne génère des tokens <UNK> (question 1.6.2).
     """
-    pass
+    print("-"*40)
+    print("Q3")
+    print("-"*40)
+    for n in [1,2,3]:
+        print(f"n={n}")
+        print("-"*20)
+        print(f"[+] fitting model MLE with n={n}")
+        trained_mle = train_LM_model(corpus, MLE, n)
+
+        print("Generated text:")
+        print("-"*20)
+        generate(trained_mle, n_words=20, text_seed=["<s>"]*(n-1), random_seed=1002)
