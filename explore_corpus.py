@@ -9,7 +9,6 @@ Dans toutes les fonctions de ce fichier, le paramètre `corpus` désigne une lis
 ]
 """
 import preprocess_corpus as pre
-from collections import Counter
 
 def count_tokens(corpus):
     """
@@ -42,7 +41,7 @@ def get_most_frequent(corpus, n):
     for sent in corpus:
         for word in sent:
             words[word] = words.get(word,0) + 1
-    return sorted(words.items(),key=lambda x: -x[1])[:n]
+    return sorted(words.items(), key=lambda x: x[1], reverse=True)[:n]
 
 
 def get_token_type_ratio(corpus):
@@ -56,7 +55,7 @@ def count_lemmas(corpus):
     """
     Renvoie le nombre de lemmes distincts
     """
-    lemmatized_corpus = pre.lemmatize(corpus) # TODO: Do we stem before lemmatize ?
+    lemmatized_corpus = pre.lemmatize(corpus)
     return count_types(lemmatized_corpus)
 
 def count_stems(corpus):
@@ -81,12 +80,12 @@ def explore(corpus):
 
     (Les chiffres ci-dessus sont indicatifs et ne correspondent pas aux résultats attendus)
     """
-    print(f"Le nombre total de tokens: {count_tokens(corpus)}")
-    print(f"Le nombre total de mots distincts: {count_types(corpus)}")
-    print(f"Les 15 mots les plus fréquents du vocabulaire ainsi que leur fréquence: {get_most_frequent(corpus,15)}")
-    print(f"Le ratio token/type: {get_token_type_ratio(corpus)}")
-    print(f"Le nombre total de lemmes distincts: {count_lemmas(corpus)}")
-    print(f"Le nombre total de racines distinctes: {count_stems(corpus)}")
+    print(f"a. Nombre total de tokens: {count_tokens(corpus)}")
+    print(f"b. Nombre total de mots distincts: {count_types(corpus)}")
+    print(f"c. Les 15 mots les plus fréquents du vocabulaire ainsi que leur fréquence: {get_most_frequent(corpus,15)}")
+    print(f"d. Ratio token/type: {get_token_type_ratio(corpus)}")
+    print(f"e. Nombre total de lemmes distincts: {count_lemmas(corpus)}")
+    print(f"f. Nombre total de racines distinctes: {count_stems(corpus)}")
 
 if __name__ == "__main__":
     """

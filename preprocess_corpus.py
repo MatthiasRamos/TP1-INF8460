@@ -52,7 +52,7 @@ def lemmatize(corpus):
     :return: list(list(str)), une liste de phrases lemmatisées
     """
     lm = nltk.WordNetLemmatizer()
-    return [list(map(lm.lemmatize,st)) for st in corpus]
+    return [list(map(lm.lemmatize, st)) for st in corpus]
 
 def stem(corpus):
     """
@@ -62,7 +62,7 @@ def stem(corpus):
     :return: list(list(str)), une liste de phrases stemées
     """
     stemmer = nltk.PorterStemmer()
-    return [list(map(stemmer.stem,st)) for st in corpus]
+    return [list(map(stemmer.stem, st)) for st in corpus]
 
 def read_and_preprocess(filename):
     """
@@ -123,49 +123,49 @@ if __name__ == "__main__":
     import re
     data_folder = "data"
     output_folder = "output"
-    os.makedirs(output_folder,exist_ok=True)
+    os.makedirs(output_folder, exist_ok=True)
 
-    with open(os.path.join(data_folder,"shakespeare_test.txt"), "r") as f:
+    with open(os.path.join(data_folder, "shakespeare_test.txt"), "r") as f:
         raw_text = f.read().split("\n\n",1)[1]
-        raw_text = " ".join(re.split("\n\n\w+\n\n",raw_text)).replace("\n"," ")
+        raw_text = " ".join(re.split("\n\n\w+\n\n", raw_text)).replace("\n"," ")
 
         sg_text, tk_text, lm_text, stem_text = test_preprocessing(raw_text)
 
         # save sentences
-        with open(os.path.join(output_folder,"shakespeare_test_phrases.txt"),"w") as fout:
+        with open(os.path.join(output_folder, "shakespeare_test_phrases.txt"),"w") as fout:
             fout.write("\n".join(sg_text))
 
         # save words
-        with open(os.path.join(output_folder,"shakespeare_test_mots.txt"),"w") as fout:
+        with open(os.path.join(output_folder, "shakespeare_test_mots.txt"),"w") as fout:
             fout.write("\n".join(map(lambda list_words: " ".join(list_words),tk_text)))
 
         # save lemmes
-        with open(os.path.join(output_folder,"shakespeare_test_lemmes.txt"),"w") as fout:
+        with open(os.path.join(output_folder, "shakespeare_test_lemmes.txt"),"w") as fout:
             fout.write("\n".join(map(lambda list_words: " ".join(list_words),lm_text)))
         
         # save stems
-        with open(os.path.join(output_folder,"shakespeare_test_stems.txt"),"w") as fout:
+        with open(os.path.join(output_folder, "shakespeare_test_stems.txt"),"w") as fout:
             fout.write("\n".join(map(lambda list_words: " ".join(list_words),stem_text)))
 
-    with open(os.path.join(data_folder,"shakespeare_train.txt"), "r") as f:
+    with open(os.path.join(data_folder, "shakespeare_train.txt"), "r") as f:
         raw_text = f.read().split("\n",1)[1]
-        raw_text = " ".join(re.split("\n\n.*:",raw_text)).replace("\n"," ")
+        raw_text = " ".join(re.split("\n\n.*:", raw_text)).replace("\n"," ")
 
         sg_text, tk_text, lm_text, stem_text = test_preprocessing(raw_text)
 
         # save sentences
-        with open(os.path.join(output_folder,"shakespeare_train_phrases.txt"),"w") as fout:
+        with open(os.path.join(output_folder, "shakespeare_train_phrases.txt"),"w") as fout:
             fout.write("\n".join(sg_text))
 
         # save words
-        with open(os.path.join(output_folder,"shakespeare_train_mots.txt"),"w") as fout:
+        with open(os.path.join(output_folder, "shakespeare_train_mots.txt"),"w") as fout:
             fout.write("\n".join(map(lambda list_words: " ".join(list_words),tk_text)))
 
         # save lemmes
-        with open(os.path.join(output_folder,"shakespeare_train_lemmes.txt"),"w") as fout:
+        with open(os.path.join(output_folder, "shakespeare_train_lemmes.txt"),"w") as fout:
             fout.write("\n".join(map(lambda list_words: " ".join(list_words),lm_text)))
         
         # save stems
-        with open(os.path.join(output_folder,"shakespeare_train_stems.txt"),"w") as fout:
+        with open(os.path.join(output_folder, "shakespeare_train_stems.txt"),"w") as fout:
             fout.write("\n".join(map(lambda list_words: " ".join(list_words),stem_text)))
     

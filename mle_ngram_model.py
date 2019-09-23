@@ -71,7 +71,7 @@ def count_ngrams(corpus, n):
     ngrams = extract_ngrams(corpus, n)
     for ngram_list in ngrams:
         for ngram in ngram_list:
-            counts[ngram[:len(ngram) - 1]][ngram[-1]]+=1
+            counts[ngram[:n - 1]][ngram[n-1]] += 1
     return counts
 
 def compute_MLE(counts):
@@ -165,8 +165,8 @@ if __name__ == "__main__":
     # Load corpus
     corpus = read_and_preprocess("output/shakespeare_train_lemmes.txt")
     for n,n_contexts in contexts.items():
-        print(f"n={n}")
         print("-"*20)
+        print(f"n={n}")
         model = NgramModel(corpus,n)
         for context in n_contexts:
             print(f"{context} --> {model.predict_next(context)}")
