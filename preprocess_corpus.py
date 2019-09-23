@@ -2,8 +2,6 @@
 Questions 1.1.1 à 1.1.5 : prétraitement des données.
 """
 import nltk
-import matplotlib
-import numpy
 
 nltk.download("punkt")
 nltk.download("wordnet")

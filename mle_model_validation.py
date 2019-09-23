@@ -30,7 +30,7 @@ def train_MLE_model(corpus, n):
     ngrams, words = padded_everygram_pipeline(n, corpus)
     vocab = Vocabulary(words, unk_cutoff=1)
 
-    model = MLE(n,vocabulary=vocab)
+    model = MLE(n, vocabulary=vocab)
     model.fit(ngrams)
 
     return model
@@ -57,9 +57,8 @@ def compare_models(your_model, nltk_model, corpus, n):
             if nltk_proba != proba:
                 faulty_ngrams_counts+=1
                 print(f"\tdifferent probability found! context:{context} token:{word}, nltk_proba:{nltk_proba}, my_proba:{proba}")
-            else:
-                print(nltk_proba,proba)
-    print(f"\tpercentage of incorrect ngrams: {faulty_ngrams_counts * 1. /ngrams_count}")
+
+    print(f"\tratio of incorrect ngrams: {faulty_ngrams_counts * 1. /ngrams_count}")
     return faulty_ngrams_counts * 1. /ngrams_count
 
 
