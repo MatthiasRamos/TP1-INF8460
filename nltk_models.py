@@ -18,6 +18,7 @@ On peut ensuite entraîner le modèle avec la méthode `model.fit(ngrams)`
 from nltk.lm.models import MLE, Laplace, Lidstone
 from nltk.lm.vocabulary import Vocabulary
 from nltk.lm.preprocessing import padded_everygram_pipeline
+from nltk import RegexpTokenizer
 from preprocess_corpus import read_and_preprocess
 import numpy as np
 import os
@@ -100,22 +101,35 @@ def generate(model, n_words, text_seed=None, random_seed=None):
     ne pas fixer de seed, il suffit de laisser `random_seed=None`
     :return: str
     """
-    i = 0
-    text_generated = ""
-    regenerate = True
-    while regenerate:
-        tokens_generated = list(model.generate(n_words, text_seed, random_seed))
-        regenerate = False
-        if "</s>" in tokens_generated:
-            i = tokens_generated.index("</s>")
-            if i < n_words - model.order:
-                n_words -= i
-                tokens_generated = tokens_generated[:i]
-                random_seed += 1
-                regenerate = True
-        text_generated += " ".join(tokens_generated) + " "
+    n = model.order
+    if text_seed is None:
+        text_seed = ["<s>"]*(n-1)
+    if len(text_seed)!=n-1:
+        raise ValueError(f"Inconsistency in the size of text_seed, got {len(text_seed)}, expected {n}")
 
-    return text_generated
+    text_words = []
+    to_generate = n_words
+    current_txt_seed = text_seed
+    while to_generate>0:
+        text_words.append(model.generate(1, current_txt_seed, random_seed))
+        to_generate-=1
+        if n != 1:
+            if text_words[-1] == "</s>":
+                # don't count the ending word!
+                to_generate+=1
+                # if the </s> was generated, start a new sentence!
+                current_txt_seed = text_seed
+                # also change the seed
+                if not random_seed is None:
+                    random_seed+=1
+            else:
+                # otherwise continue with the new context
+                current_txt_seed = text_words[-n+1:]
+        else:
+            # to get a different prediction for the 1-gram model we change the seed
+            if not random_seed is None:
+                random_seed+=1
+    return " ".join(text_words)
 
 if __name__ == "__main__":
     print("Loading data...")
@@ -197,7 +211,12 @@ if __name__ == "__main__":
     print("-"*40)
     print("Q3")
     print("-"*40)
-    corpus_trump = read_and_preprocess("data/trump.txt")
+    tokenizer = RegexpTokenizer(r'([@#]?\w+|\S)')
+    with open("data/trump.txt","r") as fin:
+        # read raw data
+        raw_data = fin.readlines()
+        # tockenize
+        corpus_trump = list(map(lambda x:tokenizer.tokenize(x.replace("&amp;","&")),raw_data))
 
     for n in [1,2,3]:
         print(f"n={n}")
@@ -206,4 +225,29 @@ if __name__ == "__main__":
         trained_mle = train_LM_model(corpus_trump, MLE, n, unk_cutoff=1)
         print("Generated text:")
         print("-"*20)
-        print(generate(trained_mle, n_words=20, random_seed=1002))
+        generated = generate(trained_mle, n_words=20, random_seed=103) 
+        print(generated)
+    """
+    >output:
+    ----------------------------------------
+    Q3
+    ----------------------------------------
+    n=1
+    --------------------
+    [+] fitting model MLE with n=1
+    Generated text:
+    --------------------
+    with went that is @SenJohnMcCain . AMERICA tried race __URL__ ! @MELANIATRUMP the presidency @KellyRiddell is to action & a
+    n=2
+    --------------------
+    [+] fitting model MLE with n=2
+    Generated text:
+    --------------------
+    Will the world where working with you were written their way with you were written their way with you were
+    n=3
+    --------------------
+    [+] fitting model MLE with n=3
+    Generated text:
+    --------------------
+    Will the world with O & Hillary could stand to watch tonight ! __URL__ __URL__ </s> Why would we take policy
+    """
