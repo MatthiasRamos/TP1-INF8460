@@ -225,8 +225,9 @@ if __name__ == "__main__":
         trained_mle = train_LM_model(corpus_trump, MLE, n, unk_cutoff=1)
         print("Generated text:")
         print("-"*20)
-        generated = generate(trained_mle, n_words=20, random_seed=103) 
-        print(generated)
+        for s in range(2):
+            generated = generate(trained_mle, n_words=20, random_seed=103+2*s) 
+            print(f"Segment {s+1}:\n",generated)
     """
     >output:
     ----------------------------------------
@@ -237,17 +238,26 @@ if __name__ == "__main__":
     [+] fitting model MLE with n=1
     Generated text:
     --------------------
+    Segment 1:
     with went that is @SenJohnMcCain . AMERICA tried race __URL__ ! @MELANIATRUMP the presidency @KellyRiddell is to action & a
+    Segment 2:
+    that is @SenJohnMcCain . AMERICA tried race __URL__ ! @MELANIATRUMP the presidency @KellyRiddell is to action & a " were
     n=2
     --------------------
     [+] fitting model MLE with n=2
     Generated text:
     --------------------
+    Segment 1:
     Will the world where working with you were written their way with you were written their way with you were
+    Segment 2:
+    The reporter is the state the state the state the state the state the state the state the state the
     n=3
     --------------------
     [+] fitting model MLE with n=3
     Generated text:
     --------------------
+    Segment 1:
     Will the world with O & Hillary could stand to watch tonight ! __URL__ __URL__ </s> Why would we take policy
+    Segment 2:
+    The reporter who pulled - back to work the way to take those rights away from women ! </s> RT @TeamTrump
     """
