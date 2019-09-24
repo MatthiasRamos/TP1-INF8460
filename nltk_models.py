@@ -100,7 +100,22 @@ def generate(model, n_words, text_seed=None, random_seed=None):
     ne pas fixer de seed, il suffit de laisser `random_seed=None`
     :return: str
     """
-    pass
+    i = 0
+    text_generated = ""
+    regenerate = True
+    while regenerate:
+        tokens_generated = list(model.generate(n_words, text_seed, random_seed))
+        regenerate = False
+        if "</s>" in tokens_generated:
+            i = tokens_generated.index("</s>")
+            if i < n_words - model.order:
+                n_words -= i
+                tokens_generated = tokens_generated[:i]
+                random_seed += 1
+                regenerate = True
+        text_generated += " ".join(tokens_generated) + " "
+
+    return text_generated
 
 if __name__ == "__main__":
     print("Loading data...")
@@ -182,12 +197,13 @@ if __name__ == "__main__":
     print("-"*40)
     print("Q3")
     print("-"*40)
+    corpus_trump = read_and_preprocess("data/trump.txt")
+
     for n in [1,2,3]:
         print(f"n={n}")
         print("-"*20)
         print(f"[+] fitting model MLE with n={n}")
-        trained_mle = train_LM_model(corpus, MLE, n)
-
+        trained_mle = train_LM_model(corpus_trump, MLE, n, unk_cutoff=1)
         print("Generated text:")
         print("-"*20)
-        generate(trained_mle, n_words=20, text_seed=["<s>"]*(n-1), random_seed=1002)
+        print(generate(trained_mle, n_words=20, random_seed=1002))
