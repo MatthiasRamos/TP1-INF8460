@@ -101,6 +101,7 @@ def generate(model, n_words, text_seed=None, random_seed=None):
     ne pas fixer de seed, il suffit de laisser `random_seed=None`
     :return: str
     """
+    np.random.seed(random_seed)
     n = model.order
     if text_seed is None:
         text_seed = ["<s>"]*(n-1)
@@ -108,27 +109,23 @@ def generate(model, n_words, text_seed=None, random_seed=None):
         raise ValueError(f"Inconsistency in the size of text_seed, got {len(text_seed)}, expected {n}")
 
     text_words = []
-    to_generate = n_words
-    current_txt_seed = text_seed
-    while to_generate>0:
-        text_words.append(model.generate(1, current_txt_seed, random_seed))
-        to_generate-=1
-        if n != 1:
-            if text_words[-1] == "</s>":
-                # don't count the ending word!
-                to_generate+=1
-                # if the </s> was generated, start a new sentence!
-                current_txt_seed = text_seed
-                # also change the seed
+    regenerate = True
+    while regenerate:
+        tokens_generated = list(model.generate(n_words, text_seed, random_seed))
+        regenerate = False
+        if "</s>" in tokens_generated:
+            i = tokens_generated.index("</s>")
+            if i < n_words - model.order:
+                # remaining number of words to generate next!
+                n_words -= i
+                # keep the first sentence!
+                tokens_generated = tokens_generated[:i+1]
+                # change the seed to have a new begining for the new sentence!
                 if not random_seed is None:
-                    random_seed+=1
-            else:
-                # otherwise continue with the new context
-                current_txt_seed = text_words[-n+1:]
-        else:
-            # to get a different prediction for the 1-gram model we change the seed
-            if not random_seed is None:
-                random_seed+=1
+                    random_seed = np.random.randint(1000)
+                # keep looping
+                regenerate = True
+        text_words+=tokens_generated
     return " ".join(text_words)
 
 if __name__ == "__main__":
@@ -226,7 +223,7 @@ if __name__ == "__main__":
         print("Generated text:")
         print("-"*20)
         for s in range(2):
-            generated = generate(trained_mle, n_words=20, random_seed=103+2*s) 
+            generated = generate(trained_mle, n_words=20, random_seed=1002+s) 
             print(f"Segment {s+1}:\n",generated)
     """
     >output:
@@ -239,25 +236,25 @@ if __name__ == "__main__":
     Generated text:
     --------------------
     Segment 1:
-    with went that is @SenJohnMcCain . AMERICA tried race __URL__ ! @MELANIATRUMP the presidency @KellyRiddell is to action & a
+    all Sanders : . __URL__ failing even is Thank " @AhmedBawazir on San because him movie . Wallace good true
     Segment 2:
-    that is @SenJohnMcCain . AMERICA tried race __URL__ ! @MELANIATRUMP the presidency @KellyRiddell is to action & a " were
+    __URL__ In just This Trump ! Guy Would Trump & Bush Heading there it the ! @CNN and " @CNN
     n=2
     --------------------
     [+] fitting model MLE with n=2
     Generated text:
     --------------------
     Segment 1:
-    Will the world where working with you were written their way with you were written their way with you were
+    I hear Americans , bad judgment . S . " </s> Will be our next President ! </s> " </s> Explain to laugh
     Segment 2:
-    The reporter is the state the state the state the state the state the state the state the state the
+    Hillarys e - but is . @TheEconomist Trump Tower - VIDEO : __I am tuning in Illinois . #Debate #BigLeagueTruth
     n=3
     --------------------
     [+] fitting model MLE with n=3
     Generated text:
     --------------------
     Segment 1:
-    Will the world with O & Hillary could stand to watch tonight ! __URL__ __URL__ </s> Why would we take policy
+    I never knew my ties & shirts not being a degenerate . </s> Will be on Meet the Press with @ChuckTodd
     Segment 2:
-    The reporter who pulled - back to work the way to take those rights away from women ! </s> RT @TeamTrump
+    Hillarys Two Official Favors To Morocco Resulted In $ 28 Million For Clinton Foundation official said he likes amnesty and
     """
