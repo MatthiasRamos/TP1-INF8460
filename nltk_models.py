@@ -119,7 +119,7 @@ def generate(model, n_words, text_seed=None, random_seed=None):
                 # remaining number of words to generate next!
                 n_words -= i
                 # keep the first sentence!
-                tokens_generated = tokens_generated[:i+1]
+                tokens_generated = tokens_generated[:i]
                 # change the seed to have a new begining for the new sentence!
                 if not random_seed is None:
                     random_seed = np.random.randint(1000)
@@ -245,7 +245,7 @@ if __name__ == "__main__":
     Generated text:
     --------------------
     Segment 1:
-    I hear Americans , bad judgment . S . " </s> Will be our next President ! </s> " </s> Explain to laugh
+    I hear Americans , bad judgment . S . " Will be our next President ! " Explain to laugh
     Segment 2:
     Hillarys e - but is . @TheEconomist Trump Tower - VIDEO : __I am tuning in Illinois . #Debate #BigLeagueTruth
     n=3
@@ -254,7 +254,7 @@ if __name__ == "__main__":
     Generated text:
     --------------------
     Segment 1:
-    I never knew my ties & shirts not being a degenerate . </s> Will be on Meet the Press with @ChuckTodd
+    I never knew my ties & shirts not being a degenerate . Will be on Meet the Press with @ChuckTodd
     Segment 2:
     Hillarys Two Official Favors To Morocco Resulted In $ 28 Million For Clinton Foundation official said he likes amnesty and
     """
