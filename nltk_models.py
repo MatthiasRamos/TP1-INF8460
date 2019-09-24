@@ -101,6 +101,7 @@ def generate(model, n_words, text_seed=None, random_seed=None):
     ne pas fixer de seed, il suffit de laisser `random_seed=None`
     :return: str
     """
+    #control randommization for constant generation of tokens
     np.random.seed(random_seed)
     n = model.order
     if text_seed is None:
@@ -127,6 +128,7 @@ def generate(model, n_words, text_seed=None, random_seed=None):
                 regenerate = True
         text_words+=tokens_generated
     return " ".join(text_words)
+
 
 if __name__ == "__main__":
     print("Loading data...")
@@ -225,36 +227,4 @@ if __name__ == "__main__":
         for s in range(2):
             generated = generate(trained_mle, n_words=20, random_seed=1002+s) 
             print(f"Segment {s+1}:\n",generated)
-    """
-    >output:
-    ----------------------------------------
-    Q3
-    ----------------------------------------
-    n=1
-    --------------------
-    [+] fitting model MLE with n=1
-    Generated text:
-    --------------------
-    Segment 1:
-    all Sanders : . __URL__ failing even is Thank " @AhmedBawazir on San because him movie . Wallace good true
-    Segment 2:
-    __URL__ In just This Trump ! Guy Would Trump & Bush Heading there it the ! @CNN and " @CNN
-    n=2
-    --------------------
-    [+] fitting model MLE with n=2
-    Generated text:
-    --------------------
-    Segment 1:
-    I hear Americans , bad judgment . S . " Will be our next President ! " Explain to laugh
-    Segment 2:
-    Hillarys e - but is . @TheEconomist Trump Tower - VIDEO : __I am tuning in Illinois . #Debate #BigLeagueTruth
-    n=3
-    --------------------
-    [+] fitting model MLE with n=3
-    Generated text:
-    --------------------
-    Segment 1:
-    I never knew my ties & shirts not being a degenerate . Will be on Meet the Press with @ChuckTodd
-    Segment 2:
-    Hillarys Two Official Favors To Morocco Resulted In $ 28 Million For Clinton Foundation official said he likes amnesty and
-    """
+
